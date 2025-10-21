@@ -1,0 +1,25 @@
+{
+  "description": "Copy-paste this config into your ~/.cursor/mcp.json",
+  "instructions": "Add this under 'mcpServers' section in your mcp.json file",
+  
+  "LOCAL": {
+    "coding-standards": {
+      "url": "http://localhost:8000/sse"
+    }
+  },
+
+  "PRODUCTION": {
+    "coding-standards": {
+      "url": "https://your-app-name.railway.app/sse"
+    }
+  },
+
+  "EXAMPLE_COMPLETE_MCP_JSON": {
+    "mcpServers": {
+      "coding-standards": {
+        "url": "http://localhost:8000/sse"
+      }
+    }
+  }
+}
+
