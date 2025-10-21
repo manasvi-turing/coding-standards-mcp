@@ -25,7 +25,11 @@ This MCP server provides coding standards to AI assistants (like Cursor) so they
 
 **1. Start the server:**
 ```bash
+# Local development
 uv run server.py
+
+# Or with plain Python
+python server.py
 ```
 
 **2. Configure Cursor**
