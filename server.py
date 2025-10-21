@@ -94,21 +94,8 @@ def list_coding_standards() -> str:
     return "\n".join(result)
 
 
-@mcp.tool()
-def get_coding_standard(category: str, name: Optional[str] = None) -> str:
-    """
-    Get coding standards for a specific language or framework.
-    
-    Args:
-        category: The category (e.g., 'general', 'python', 'react_and_nextjs', 'java', 'nodejs')
-        name: Optional specific standard name (e.g., 'debugging', 'testing'). 
-              If not provided, returns the main standard file or all files in the category.
-    
-    Examples:
-        - get_coding_standard('general') - Get general coding standards
-        - get_coding_standard('python') - Get Python coding standards
-        - get_coding_standard('general', 'debugging') - Get debugging standards
-    """
+def _get_coding_standard_impl(category: str, name: Optional[str] = None) -> str:
+    """Helper function to get coding standards (not exposed as tool)"""
     if not STANDARDS_DIR.exists():
         return f"Error: Standards directory not found at {STANDARDS_DIR}"
     
@@ -154,6 +141,24 @@ def get_coding_standard(category: str, name: Optional[str] = None) -> str:
 
 
 @mcp.tool()
+def get_coding_standard(category: str, name: Optional[str] = None) -> str:
+    """
+    Get coding standards for a specific language or framework.
+    
+    Args:
+        category: The category (e.g., 'general', 'python', 'react_and_nextjs', 'java', 'nodejs')
+        name: Optional specific standard name (e.g., 'debugging', 'testing'). 
+              If not provided, returns the main standard file or all files in the category.
+    
+    Examples:
+        - get_coding_standard('general') - Get general coding standards
+        - get_coding_standard('python') - Get Python coding standards
+        - get_coding_standard('general', 'debugging') - Get debugging standards
+    """
+    return _get_coding_standard_impl(category, name)
+
+
+@mcp.tool()
 def get_standards_for_project(languages: List[str]) -> str:
     """
     Get all relevant coding standards for a project using multiple languages/frameworks.
@@ -167,7 +172,7 @@ def get_standards_for_project(languages: List[str]) -> str:
     result = ["# Project Coding Standards\n"]
     
     # Always include general standards
-    general = get_coding_standard("general")
+    general = _get_coding_standard_impl("general")
     if not general.startswith("Error"):
         result.append("## General Standards\n")
         result.append(general)
@@ -175,7 +180,7 @@ def get_standards_for_project(languages: List[str]) -> str:
     
     # Add standards for each language
     for lang in languages:
-        lang_std = get_coding_standard(lang)
+        lang_std = _get_coding_standard_impl(lang)
         if not lang_std.startswith("Error") and not lang_std.startswith("Category"):
             result.append(f"## {lang.replace('_', ' ').title()} Standards\n")
             result.append(lang_std)
