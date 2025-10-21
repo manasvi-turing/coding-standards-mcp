@@ -1,3 +1,7 @@
+---
+description: React and Next.js coding standards, component patterns, and best practices
+---
+
 # React & Next.js Coding Standards
 
 [Template - Fill in your React/Next.js coding standards here]

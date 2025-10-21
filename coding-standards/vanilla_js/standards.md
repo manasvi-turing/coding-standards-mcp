@@ -1,3 +1,7 @@
+---
+description: Vanilla JavaScript coding standards and best practices
+---
+
 # Vanilla JavaScript Coding Standards
 
 [Template - Fill in your Vanilla JS coding standards here]
