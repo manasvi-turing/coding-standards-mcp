@@ -1,3 +1,7 @@
+---
+description: Node.js coding standards, patterns, and best practices
+---
+
 # Node.js Coding Standards
 
 [Template - Fill in your Node.js coding standards here]
@@ -22,3 +26,9 @@
 - Implement caching
 - Optimize database queries
 
+## Environment and Dependency Management
+
+* Always use **Yarn** as the package manager.
+* Install dependencies with **`yarn add <package>`**.
+* Run scripts with **`yarn <script>`**.
+* Avoid mixing **npm** and **yarn** to ensure deterministic builds.

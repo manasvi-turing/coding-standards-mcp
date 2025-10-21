@@ -1,3 +1,7 @@
+---
+description: Best practices for debugging and troubleshooting code issues
+---
+
 # Debugging Framework
 
 ## 1. Purpose

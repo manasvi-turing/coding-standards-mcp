@@ -84,14 +84,14 @@ Want to see and test all tools visually?
 
 ```bash
 # Run with MCP Inspector
-npx @modelcontextprotocol/inspector uv run ./server.py
+npx @modelcontextprotocol/inspector
 ```
 
 **Inspector will be available at:** `http://localhost:6274/`
 
 **In the inspector frontend, use:**
 - Transport: `SSE`
-- URL: `http://localhost:8000/sse`
+- URL: `http://localhost:8000/sse` or deployed link
 - Connection Type: `Via Proxy`
 
 This gives you a web UI to test all tools interactively!
@@ -160,56 +160,6 @@ ai-sdlc/
 ├── railway.json                 # Railway config
 └── pyproject.toml              # Python config
 ```
-
----
-
-## 💡 Tips
-
-**Keep server running:**
-```bash
-# Local development
-uv run server.py
-
-# Production
-Deploy to Railway (one-time setup)
-```
-
-**Update standards:**
-```bash
-# Edit any .md file in coding-standards/
-# Server picks up changes automatically
-git commit & push to share with team
-```
-
-**Verify it's working:**
-In Cursor, ask: "Write a Python function to read JSON"
-The AI should use type hints, docstrings, and your standards!
-
----
-
-## 🆘 Troubleshooting
-
-**Server not connecting?**
-1. Check server is running: `lsof -i :8000`
-2. Verify mcp.json syntax
-3. Restart Cursor completely (⌘+Q, not just reload)
-
-**Standards not applied?**
-1. Ensure server is running
-2. Look for 🟢 in Cursor status bar
-3. Try explicitly: "Use our Python coding standards"
-
-**Update not reflected?**
-- Server picks up file changes automatically
-- If deployed, push changes and redeploy
-
----
-
-## 📚 More Info
-
-- **Setup**: See `SHARE_WITH_TEAM.md` for team onboarding
-- **Enforcement**: See `ENSURE_STANDARDS_USED.md` for advanced options
-- **Deployment**: Just `railway up` in this directory
 
 ---
 

@@ -4,8 +4,9 @@ Provides access to coding standards and best practices for various languages and
 """
 
 import os
+import re
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 from fastmcp import FastMCP
 
 # Create MCP server with instructions
@@ -26,8 +27,30 @@ Available standards: python, java, nodejs, react_and_nextjs, vanilla_js, general
 STANDARDS_DIR = Path(__file__).parent / "coding-standards"
 
 
+def parse_frontmatter(content: str) -> tuple[Dict[str, Any], str]:
+    """Parse YAML frontmatter from markdown content"""
+    frontmatter = {}
+    body = content
+    
+    # Check if content starts with ---
+    if content.startswith('---\n'):
+        # Find the closing ---
+        match = re.match(r'^---\n(.*?)\n---\n(.*)', content, re.DOTALL)
+        if match:
+            frontmatter_text = match.group(1)
+            body = match.group(2)
+            
+            # Parse simple key: value pairs (no YAML library needed for simple cases)
+            for line in frontmatter_text.split('\n'):
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    frontmatter[key.strip()] = value.strip()
+    
+    return frontmatter, body
+
+
 def get_available_standards() -> dict:
-    """Scan and return available coding standards"""
+    """Scan and return available coding standards with descriptions"""
     standards = {
         "general": [],
         "languages": {},
@@ -39,14 +62,26 @@ def get_available_standards() -> dict:
     
     # Get general standards (files at root level)
     for file in STANDARDS_DIR.glob("*.md"):
-        standards["general"].append(file.stem)
+        content = file.read_text()
+        frontmatter, _ = parse_frontmatter(content)
+        standards["general"].append({
+            "name": file.stem,
+            "description": frontmatter.get("description", "No description")
+        })
     
     # Get language/framework specific standards (subdirectories)
     for subdir in STANDARDS_DIR.iterdir():
         if subdir.is_dir():
             files = list(subdir.glob("*.md"))
             if files:
-                standards["languages"][subdir.name] = [f.stem for f in files]
+                standards["languages"][subdir.name] = []
+                for file in files:
+                    content = file.read_text()
+                    frontmatter, _ = parse_frontmatter(content)
+                    standards["languages"][subdir.name].append({
+                        "name": file.stem,
+                        "description": frontmatter.get("description", "No description")
+                    })
     
     return standards
 
@@ -69,28 +104,38 @@ Available standards: Python, Java, Node.js, React/Next.js, Vanilla JS, General, 
 @mcp.tool()
 def list_coding_standards() -> str:
     """
-    List all available coding standards by language and framework.
+    List all available coding standards by language and framework with descriptions.
     Use this tool first to see what standards are available.
     """
     standards = get_available_standards()
     
     result = ["# Available Coding Standards\n"]
+    result.append("| Category | Standard | Description | Example Call |")
+    result.append("|----------|----------|-------------|--------------|")
     
+    # Add general standards
     if standards["general"]:
-        result.append("## General Standards:")
         for std in standards["general"]:
-            result.append(f"  - {std}")
-        result.append("")
+            name = std["name"] if isinstance(std, dict) else std
+            desc = std.get("description", "No description") if isinstance(std, dict) else "No description"
+            result.append(f"| `general` | `{name}` | {desc} | `get_coding_standard('general', '{name}')` |")
     
+    # Add language/framework standards
     if standards["languages"]:
-        result.append("## Language/Framework Standards:")
-        for lang, files in standards["languages"].items():
-            result.append(f"  - {lang}:")
+        for lang, files in sorted(standards["languages"].items()):
             for file in files:
-                result.append(f"    - {file}")
-        result.append("")
+                name = file["name"] if isinstance(file, dict) else file
+                desc = file.get("description", "No description") if isinstance(file, dict) else "No description"
+                result.append(f"| `{lang}` | `{name}` | {desc} | `get_coding_standard('{lang}', '{name}')` |")
     
-    result.append("\nUse get_coding_standard(category, name) to fetch specific standards.")
+    result.append("")
+    result.append("---")
+    result.append("")
+    result.append("**Quick Examples:**")
+    result.append("- General: `get_coding_standard('general', 'debugging')`")
+    result.append("- Python: `get_coding_standard('python', 'standards')`")
+    result.append("- React: `get_coding_standard('react_and_nextjs', 'standards')`")
+    
     return "\n".join(result)
 
 

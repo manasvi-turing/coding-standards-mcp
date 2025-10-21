@@ -1,3 +1,7 @@
+---
+description: Java coding standards, conventions, and best practices
+---
+
 # Java Coding Standards
 
 [Template - Fill in your Java coding standards here]
