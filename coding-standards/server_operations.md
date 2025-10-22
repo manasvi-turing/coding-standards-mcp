@@ -1,5 +1,7 @@
 ---
 description: Best practices for server operations, error handling, security, and process management
+status: active
+mandatory: false
 ---
 
 # Server Operations & Developer Experience

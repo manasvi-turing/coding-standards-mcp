@@ -1,5 +1,7 @@
 ---
 description: Guidelines for managing code complexity and maintaining readable code
+status: active
+mandatory: true
 ---
 
 # Coding Guidelines

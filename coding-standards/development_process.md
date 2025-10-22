@@ -1,5 +1,7 @@
 ---
 description: Essential development process guidelines for documentation, code tracking, and project organization
+status: active
+mandatory: false
 ---
 
 # Development Process & Documentation Standards

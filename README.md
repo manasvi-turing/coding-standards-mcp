@@ -12,10 +12,6 @@ This MCP server provides coding standards to AI assistants (like Cursor) so they
 - ✅ Ensures consistent code across your team
 - ✅ Centralizes standards - update once, apply everywhere
 
-**Languages supported:**
-- Python, Java, Node.js, React/Next.js, Vanilla JS
-- General coding practices
-- Debugging guidelines
 
 ---
 
