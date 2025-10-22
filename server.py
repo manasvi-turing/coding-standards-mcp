@@ -15,11 +15,12 @@ mcp = FastMCP(
     instructions="""You are a coding assistant that ALWAYS checks and applies team coding standards.
 
 IMPORTANT: Before generating ANY code, you MUST:
-1. Identify the language/framework being used
-2. Call get_coding_standard() to fetch relevant standards
-3. Apply those standards to all code you generate
+1. ALWAYS apply the mandatory general standards above
+2. Identify the language/framework being used
+3. Call get_coding_standard() to fetch language-specific standards
+4. Apply all relevant standards to code you generate
 
-Available standards: python, java, nodejs, react_and_nextjs, vanilla_js, general, debugging
+Available language-specific standards: python, java, nodejs, react_and_nextjs, vanilla_js
 """
 )
 
@@ -44,13 +45,26 @@ def parse_frontmatter(content: str) -> tuple[Dict[str, Any], str]:
             for line in frontmatter_text.split('\n'):
                 if ':' in line:
                     key, value = line.split(':', 1)
-                    frontmatter[key.strip()] = value.strip()
+                    key = key.strip()
+                    value = value.strip()
+                    
+                    # Convert boolean strings to actual booleans
+                    if value.lower() == 'true':
+                        value = True
+                    elif value.lower() == 'false':
+                        value = False
+                    
+                    frontmatter[key] = value
     
     return frontmatter, body
 
 
 def get_available_standards() -> dict:
-    """Scan and return available coding standards with descriptions"""
+    """Scan and return available coding standards with descriptions
+    
+    Only includes standards with status: active
+    Includes mandatory flag (defaults to False if not present)
+    """
     standards = {
         "general": [],
         "languages": {},
@@ -64,24 +78,36 @@ def get_available_standards() -> dict:
     for file in STANDARDS_DIR.glob("*.md"):
         content = file.read_text()
         frontmatter, _ = parse_frontmatter(content)
-        standards["general"].append({
-            "name": file.stem,
-            "description": frontmatter.get("description", "No description")
-        })
+        
+        # Only include if status is active
+        if frontmatter.get("status") == "active":
+            standards["general"].append({
+                "name": file.stem,
+                "description": frontmatter.get("description", "No description"),
+                "mandatory": frontmatter.get("mandatory", False)
+            })
     
     # Get language/framework specific standards (subdirectories)
     for subdir in STANDARDS_DIR.iterdir():
         if subdir.is_dir():
             files = list(subdir.glob("*.md"))
             if files:
-                standards["languages"][subdir.name] = []
+                category_standards = []
                 for file in files:
                     content = file.read_text()
                     frontmatter, _ = parse_frontmatter(content)
-                    standards["languages"][subdir.name].append({
-                        "name": file.stem,
-                        "description": frontmatter.get("description", "No description")
-                    })
+                    
+                    # Only include if status is active
+                    if frontmatter.get("status") == "active":
+                        category_standards.append({
+                            "name": file.stem,
+                            "description": frontmatter.get("description", "No description"),
+                            "mandatory": frontmatter.get("mandatory", False)
+                        })
+                
+                # Only add category if it has active standards
+                if category_standards:
+                    standards["languages"][subdir.name] = category_standards
     
     return standards
 
@@ -106,35 +132,70 @@ def list_coding_standards() -> str:
     """
     List all available coding standards by language and framework with descriptions.
     Use this tool first to see what standards are available.
+    
+    ⚠️ IMPORTANT: Standards marked as MANDATORY apply to ALL code, with NO EXCEPTIONS.
+    Language-specific standards apply based on the technology being used.
     """
     standards = get_available_standards()
     
     result = ["# Available Coding Standards\n"]
+    result.append("## 🚨 MANDATORY STANDARDS (Apply to ALL code - NO EXCEPTIONS)\n")
     result.append("| Category | Standard | Description | Example Call |")
     result.append("|----------|----------|-------------|--------------|")
     
-    # Add general standards
+    # Collect all mandatory standards (from general and languages)
+    mandatory_found = False
+    
+    # Check general standards for mandatory ones
     if standards["general"]:
         for std in standards["general"]:
-            name = std["name"] if isinstance(std, dict) else std
-            desc = std.get("description", "No description") if isinstance(std, dict) else "No description"
-            result.append(f"| `general` | `{name}` | {desc} | `get_coding_standard('general', '{name}')` |")
+            if std.get("mandatory", False):
+                name = std["name"]
+                desc = std["description"]
+                result.append(f"| `general` ⚠️ | `{name}` | **[MANDATORY]** {desc} | `get_coding_standard('general', '{name}')` |")
+                mandatory_found = True
     
-    # Add language/framework standards
+    # Check language/framework standards for mandatory ones
     if standards["languages"]:
         for lang, files in sorted(standards["languages"].items()):
             for file in files:
-                name = file["name"] if isinstance(file, dict) else file
-                desc = file.get("description", "No description") if isinstance(file, dict) else "No description"
-                result.append(f"| `{lang}` | `{name}` | {desc} | `get_coding_standard('{lang}', '{name}')` |")
+                if file.get("mandatory", False):
+                    name = file["name"]
+                    desc = file["description"]
+                    result.append(f"| `{lang}` ⚠️ | `{name}` | **[MANDATORY]** {desc} | `get_coding_standard('{lang}', '{name}')` |")
+                    mandatory_found = True
     
-    result.append("")
-    result.append("---")
-    result.append("")
-    result.append("**Quick Examples:**")
-    result.append("- General: `get_coding_standard('general', 'debugging')`")
-    result.append("- Python: `get_coding_standard('python', 'standards')`")
-    result.append("- React: `get_coding_standard('react_and_nextjs', 'standards')`")
+    if not mandatory_found:
+        result.append("| - | - | No mandatory standards configured | - |")
+    
+    result.append("\n## 📚 Language/Framework Specific Standards (Apply based on technology used)\n")
+    result.append("| Category | Standard | Description | Example Call |")
+    result.append("|----------|----------|-------------|--------------|")
+    
+    # Add non-mandatory standards
+    specific_found = False
+    
+    # Add non-mandatory general standards
+    if standards["general"]:
+        for std in standards["general"]:
+            if not std.get("mandatory", False):
+                name = std["name"]
+                desc = std["description"]
+                result.append(f"| `general` | `{name}` | {desc} | `get_coding_standard('general', '{name}')` |")
+                specific_found = True
+    
+    # Add non-mandatory language/framework standards
+    if standards["languages"]:
+        for lang, files in sorted(standards["languages"].items()):
+            for file in files:
+                if not file.get("mandatory", False):
+                    name = file["name"]
+                    desc = file["description"]
+                    result.append(f"| `{lang}` | `{name}` | {desc} | `get_coding_standard('{lang}', '{name}')` |")
+                    specific_found = True
+    
+    if not specific_found:
+        result.append("| - | - | No language-specific standards configured | - |")
     
     return "\n".join(result)
 
@@ -238,7 +299,7 @@ if __name__ == "__main__":
     import os
     
     # Run as HTTP server with SSE (for local and remote deployment)
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 8002))
     
     print(f"🚀 Starting Coding Standards MCP Server")
     print(f"📡 HTTP Server: http://0.0.0.0:{port}")

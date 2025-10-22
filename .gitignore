@@ -9,6 +9,8 @@ venv/
 ENV/
 env/
 testing/
+register_and_run_py/
+
 # UV
 uv.lock
 

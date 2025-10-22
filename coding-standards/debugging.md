@@ -1,5 +1,7 @@
 ---
 description: Best practices for debugging and troubleshooting code issues
+status: active
+mandatory: false
 ---
 
 # Debugging Framework

@@ -1,5 +1,6 @@
 ---
 description: Fast API coding standards and best practices
+status: active
 ---
 
 # FastAPI Coding Standards
