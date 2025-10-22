@@ -12,6 +12,8 @@ Your AI assistant (Cursor, Claude, etc.) will automatically follow your team's c
 - ✅ Centralized standards - update once, apply everywhere
 - ✅ Works with Python, Java, Node.js, React, and more
 
+📖 **[Read the blog post: From AI Coding Chaos to Team Standards](wiki/Blog.md)** - Learn about the challenges with file-based standards and why MCP might be the ideal solution for teams (as of now, landscape changing very fast).
+
 ---
 
 ## 🚀 How to Use
@@ -343,6 +345,21 @@ curl https://your-app.railway.app/sse
 - Check Python version (3.11+)
 - Verify all dependencies installed
 - Check port 8000 is available
+
+---
+
+## 📚 Learn More
+
+**[From AI Coding Chaos to Team Standards](wiki/Blog.md)** - Read our journey from file-based standards to MCP, including:
+- The challenges with agents.md and .cursorrules
+- Why AI agents ignore file-based rules
+- How MCP solves team-scale standards enforcement
+- Real-world implementation guide
+
+**[Research Documentation](wiki/research/)** - Deep dive into our findings:
+- [agents.md reliability issues](wiki/research/01-agents-md-reliability-issues.md) - Community reports and root causes
+- [MCP architecture advantages](wiki/research/02-mcp-architecture-advantages.md) - Technical comparison and benefits
+- [Key statistics and quotes](wiki/research/03-key-statistics-and-quotes.md) - Data points and evidence
 
 ---
 
