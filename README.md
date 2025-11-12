@@ -27,7 +27,7 @@ Edit `~/.cursor/mcp.json` (create if it doesn't exist):
   "mcpServers": {
     "coding-standards": {
       "name": "Coding Standards",
-      "description": "IMPORTANT: Before generating ANY code, ALWAYS check this server for coding standards. Provides mandatory team coding standards, style guides, best practices, and patterns for Python, Java, Node.js, React/Next.js, JavaScript, general coding, and debugging. Call get_coding_standard() with the language name before writing code to ensure compliance with team standards.",
+      "description": "IMPORTANT: Before generating ANY code, ALWAYS check this server for coding standards. Provides mandatory team coding standards, style guides, best practices, and patterns for Python, Java, Node.js, React/Next.js, JavaScript, general coding, and debugging. Call get_coding_standard() with the language name before writing code to ensure compliance with team standards. And always use the engineering manager ai tool to get the coding standards before writing code.",
       "url": "https://web-production-ad318.up.railway.app/sse"
     }
   }

@@ -11,6 +11,7 @@ env/
 testing/
 register_and_run_py/
 blog/
+.env
 
 # UV
 uv.lock

@@ -7,7 +7,17 @@ import os
 import re
 from pathlib import Path
 from typing import List, Optional, Dict, Any
+from dotenv import load_dotenv
 from fastmcp import FastMCP
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Import Engineering Manager AI tool
+from ai_em.engineering_manager_tool import (
+    consult_engineering_manager as em_consult,
+    TOOL_DESCRIPTION as EM_TOOL_DESC
+)
 
 # Create MCP server with instructions
 mcp = FastMCP(
@@ -293,6 +303,128 @@ def get_standards_for_project(languages: List[str]) -> str:
             result.append("\n---\n")
     
     return "\n".join(result)
+
+
+@mcp.tool()
+def consult_engineering_manager(
+    question: str,
+    project_context: Optional[str] = None,
+    conversation_history: Optional[str] = None
+) -> str:
+    """
+    Consult Senior Engineering Manager AI for architectural and technical decisions.
+    
+    Use this when you need expert guidance on:
+    - System architecture and design patterns
+    - Technology stack selection and trade-offs
+    - Scalability and performance optimization
+    - Cost optimization strategies (cloud, infrastructure)
+    - Best practices for large-scale distributed systems
+    - Microservices vs monolith decisions
+    - Database selection and design
+    - DevOps, CI/CD, and deployment strategies
+    
+    ⚠️ IMPORTANT - HANDLING CLARIFYING QUESTIONS:
+    
+    The EM will often ask clarifying questions. You MUST handle this properly:
+    
+    ✅ OPTION 1: Multi-turn conversation (preferred for complex decisions)
+       - First call: Get clarifying questions from EM
+       - Ask user for answers to those specific questions
+       - Second call: Provide answers using conversation_history parameter
+       - EM provides tailored recommendations
+    
+    ✅ OPTION 2: Fast Path with explicit assumptions (when user wants quick guidance)
+       - Include "ASSUMPTIONS:" keyword in project_context
+       - List explicit assumptions about team, scale, budget, timeline, experience
+       - EM will provide immediate conditional guidance based on stated assumptions
+       - Example: "ASSUMPTIONS: Small team (3 devs), MVP phase, budget <$500/month, 
+                   familiar with SQL, need to ship in 2 weeks"
+    
+    ❌ OPTION 3: DO NOT proceed without guidance (defeats the purpose!)
+       - DO NOT ignore clarifying questions and make your own decisions
+       - DO NOT call the tool and then not use its advice
+       - That defeats the entire purpose of expert consultation
+    
+    🚨 MANDATORY: TODO Generation & Pre-Flight Checklist
+    
+    When the EM provides a STRUCTURED ACTION PLAN (with REQUIRED_TODOS), you MUST:
+    
+    1. **Create TODOs BEFORE implementing**:
+       - Call todo_write() with all items from REQUIRED_TODOS
+       - Mark the first TODO as "in_progress", rest as "pending"
+       - Include priority and time estimates in TODO content
+    
+    2. **Present Pre-Flight Checklist to user**:
+       ```
+       📋 Pre-Flight Checklist (from Engineering Manager)
+       
+       The EM recommended I build:
+       ✓ [Component 1]
+       ✓ [Component 2]
+       ✓ [Component 3]
+       
+       Success criteria:
+       - [Criterion 1]
+       - [Criterion 2]
+       
+       Implementation order:
+       1. [Step 1] (blocks [Step 2, 3])
+       2. [Step 2]
+       3. [Step 3]
+       
+       Estimated timeline: X hours
+       
+       Proceeding with implementation...
+       ```
+    
+    3. **Follow the IMPLEMENTATION_ORDER** provided by EM
+       - Don't skip foundational steps
+       - Respect blocking dependencies
+       - Complete critical tasks first
+    
+    4. **Check off items as you complete them**
+       - Update TODOs to "completed" when done
+       - Verify SUCCESS_CRITERIA are met before marking complete
+    
+    ⚠️ If you skip TODO generation or ignore the action plan, you are misusing this tool!
+    
+    Args:
+        question: The technical question or problem to discuss
+        project_context: Optional project details. For FAST PATH, prefix with "ASSUMPTIONS:" 
+                        followed by explicit constraints (team size, scale, budget, timeline, 
+                        experience level, tech familiarity)
+        conversation_history: Optional JSON string of previous messages for multi-turn conversations
+    
+    Examples:
+        # Example 1: Multi-turn (get clarifying questions first)
+        response1 = consult_engineering_manager(
+            question="Should I use microservices?"
+        )
+        # EM asks: team size? scale? budget? etc.
+        # Ask user these questions, then:
+        response2 = consult_engineering_manager(
+            question="Team: 5 devs, 10K users expected, $1K/month budget",
+            conversation_history='[{"role":"user","content":"Should I use microservices?"},{"role":"assistant","content":"..."}]'
+        )
+        
+        # Example 2: Fast path with assumptions (immediate guidance)
+        response = consult_engineering_manager(
+            question="Should I use PostgreSQL or MongoDB?",
+            project_context="ASSUMPTIONS: Small team (3 devs), relational data model, 
+                            team familiar with SQL, MVP phase, budget <$500/month, 
+                            need to ship in 4 weeks"
+        )
+        # EM provides immediate conditional recommendations
+        
+        # Example 3: With context (EM may still ask some questions)
+        response = consult_engineering_manager(
+            question="How should I handle real-time updates?",
+            project_context="Building analytics dashboard, Python FastAPI + React, 
+                            500 concurrent users, updates every 2 seconds"
+        )
+    """
+    return em_consult(question, project_context, conversation_history)
 
 
 if __name__ == "__main__":
